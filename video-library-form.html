@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ATL Video Library</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green:  #154734;
+      --gold:   #FFB81C;
+      --cream:  #FAF7F2;
+      --warm:   #F0EBE1;
+      --text:   #1A1A1A;
+      --muted:  #6B6558;
+      --border: #D9D2C5;
+      --white:  #FFFFFF;
+      --error:  #C0392B;
+      --success:#154734;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Source Sans 3', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    header {
+      background: var(--green);
+      padding: 2rem 2.5rem 1.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--gold);
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    header p {
+      color: rgba(255,255,255,0.72);
+      font-size: 0.95rem;
+      font-weight: 300;
+      margin-top: 0.4rem;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Layout ──────────────────────────────────────── */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      max-width: 1100px;
+      width: 100%;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+    }
+    @media (max-width: 720px) {
+      main { grid-template-columns: 1fr; margin: 1.5rem auto; }
+      .side-info { display: none; }
+    }
+
+    /* ── Side Info ───────────────────────────────────── */
+    .side-info {
+      padding: 2rem 3rem 2rem 0;
+    }
+    .side-info h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--green);
+      margin-bottom: 1rem;
+      line-height: 1.3;
+    }
+    .side-info p {
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    .step-list {
+      list-style: none;
+      margin-top: 1.5rem;
+    }
+    .step-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .step-num {
+      background: var(--gold);
+      color: var(--green);
+      font-weight: 700;
+      font-size: 0.75rem;
+      min-width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    /* ── Form Card ───────────────────────────────────── */
+    .form-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.5rem;
+      box-shadow: 0 4px 24px rgba(21,71,52,0.07);
+    }
+    .form-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: var(--green);
+      margin-bottom: 0.3rem;
+    }
+    .form-card .subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.75rem;
+    }
+
+    /* ── Form Fields ─────────────────────────────────── */
+    .field-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 520px) {
+      .field-group { grid-template-columns: 1fr; }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 1.1rem;
+    }
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--green);
+      margin-bottom: 0.4rem;
+    }
+    label .req { color: var(--gold); margin-left: 2px; }
+
+    input, select {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--cream);
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      padding: 0.65rem 0.9rem;
+      width: 100%;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23154734' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.9rem center;
+      padding-right: 2.2rem;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(21,71,52,0.10);
+      background: var(--white);
+    }
+    select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ── Divider ─────────────────────────────────────── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5rem 0;
+    }
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    /* ── Submit Button ───────────────────────────────── */
+    .btn-submit {
+      width: 100%;
+      background: var(--green);
+      color: var(--white);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      border: none;
+      border-radius: 8px;
+      padding: 0.85rem 1.5rem;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.12s;
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .btn-submit:hover { background: #1a5c42; }
+    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-submit .arrow { font-size: 1.1rem; transition: transform 0.18s; }
+    .btn-submit:hover .arrow { transform: translateX(4px); }
+
+    /* ── Status Messages ─────────────────────────────── */
+    .status-msg {
+      display: none;
+      padding: 0.85rem 1rem;
+      border-radius: 7px;
+      font-size: 0.88rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .status-msg.error {
+      background: #fdf2f2;
+      border: 1px solid #f5c6c6;
+      color: var(--error);
+    }
+    .status-msg.show { display: block; }
+
+    /* ── Loading Spinner ─────────────────────────────── */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .btn-submit.loading .spinner { display: block; }
+    .btn-submit.loading .btn-text { opacity: 0.7; }
+    .btn-submit.loading .arrow { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Footer ──────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>ATL Video Library</h1>
+  <p>Academic Technology & Learning · Baylor University</p>
+</header>
+
+<main>
+  <!-- Side info panel -->
+  <aside class="side-info">
+    <h2>Watch. Learn.<br>Tell us you were here.</h2>
+    <p>Help us understand which resources are reaching faculty and staff across institutions. Takes less than a minute.</p>
+    <ul class="step-list">
+      <li><span class="step-num">1</span> Tell us a little about yourself</li>
+      <li><span class="step-num">2</span> Select the video category and title</li>
+      <li><span class="step-num">3</span> Submit — you'll go straight to the video</li>
+    </ul>
+    <p style="margin-top:1.5rem; font-size:0.82rem;">Your information is used only for internal reporting and is never shared or sold.</p>
+  </aside>
+
+  <!-- Form card -->
+  <div class="form-card">
+    <h2>Log a Video View</h2>
+    <p class="subtitle">Complete the short form below to access your selected video.</p>
+
+    <form id="viewForm">
+      <!-- Hidden field: Formspree will send this with each submission -->
+      <!-- Replace YOUR_FORM_ID below with your actual Formspree form ID -->
+
+      <p class="section-label">About You</p>
+
+      <div class="field-group">
+        <div class="field">
+          <label for="fname">First Name <span class="req">*</span></label>
+          <input type="text" id="fname" name="First Name" required placeholder="Jane" />
+        </div>
+        <div class="field">
+          <label for="lname">Last Name <span class="req">*</span></label>
+          <input type="text" id="lname" name="Last Name" required placeholder="Smith" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="email">Email Address <span class="req">*</span></label>
+        <input type="email" id="email" name="Email" required placeholder="jane.smith@university.edu" />
+      </div>
+
+      <div class="field-group">
+        <div class="field">
+          <label for="institution">Institution <span class="req">*</span></label>
+          <input type="text" id="institution" name="Institution" required placeholder="Baylor University" />
+        </div>
+        <div class="field">
+          <label for="role">Role <span class="req">*</span></label>
+          <select id="role" name="Role" required>
+            <option value="" disabled selected>Select…</option>
+            <option>Faculty</option>
+            <option>Staff</option>
+            <option>Graduate Student</option>
+            <option>Administrator</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <hr class="divider" />
+      <p class="section-label">Select Your Video</p>
+
+      <div class="field">
+        <label for="category">Category <span class="req">*</span></label>
+        <select id="category" name="Category" required>
+          <option value="" disabled selected>Select a category…</option>
+          <!-- ✏️ EDIT: Replace these with your real category names -->
+          <option value="AI Literacy">AI Literacy</option>
+          <option value="Course Design">Course Design</option>
+          <!-- Add more categories here -->
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="video">Video Title <span class="req">*</span></label>
+        <select id="video" name="Video Title" required disabled>
+          <option value="" disabled selected>Select a category first…</option>
+        </select>
+      </div>
+
+      <!-- Hidden field stores the URL so JS can redirect after submit -->
+      <input type="hidden" id="videoUrl" name="_videoUrl" />
+
+      <div id="statusMsg" class="status-msg error">
+        Something went wrong. Please try again or email us directly.
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <div class="spinner"></div>
+        <span class="btn-text">Take Me to the Video</span>
+        <span class="arrow">→</span>
+      </button>
+    </form>
+  </div>
+</main>
+
+<footer>
+  Academic Technology & Learning · Baylor University · Questions? Contact <a href="mailto:atl@baylor.edu">atl@baylor.edu</a>
+</footer>
+
+<script>
+  // ============================================================
+  // ✏️ EDIT THIS SECTION: Add your categories and videos here
+  // Format: "Category Name": [ { title: "Video Title", url: "Kaltura URL" }, ... ]
+  // ============================================================
+  const videoData = {
+    "AI Literacy": [
+      { title: "Introduction to AI in Higher Education", url: "https://cdnapisec.kaltura.com/REPLACE_ME_1" },
+      { title: "How Large Language Models Work",         url: "https://cdnapisec.kaltura.com/REPLACE_ME_2" },
+      { title: "AI Bias and Equity in the Classroom",   url: "https://cdnapisec.kaltura.com/REPLACE_ME_3" },
+    ],
+    "Course Design": [
+      { title: "Designing for Active Learning",          url: "https://cdnapisec.kaltura.com/REPLACE_ME_4" },
+      { title: "Backward Design Principles",             url: "https://cdnapisec.kaltura.com/REPLACE_ME_5" },
+      { title: "Scaffolding Student Assignments",        url: "https://cdnapisec.kaltura.com/REPLACE_ME_6" },
+    ],
+    // ✏️ Add more categories below this line:
+    // "Category Name": [
+    //   { title: "Video Title", url: "https://cdnapisec.kaltura.com/YOUR_VIDEO_URL" },
+    // ],
+  };
+
+  // ============================================================
+  // ✏️ EDIT: Replace with your Formspree form ID
+  // Sign up free at formspree.io → create a form → copy the ID
+  // It looks like: xpwzgjkl
+  // ============================================================
+  const FORMSPREE_ID = "YOUR_FORM_ID_HERE";
+
+  // ── Cascading dropdown logic ───────────────────────────────
+  const categoryEl = document.getElementById("category");
+  const videoEl    = document.getElementById("video");
+  const videoUrlEl = document.getElementById("videoUrl");
+
+  categoryEl.addEventListener("change", () => {
+    const selected = categoryEl.value;
+    const videos   = videoData[selected] || [];
+
+    videoEl.innerHTML = '<option value="" disabled selected>Select a video…</option>';
+    videos.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value       = v.url;
+      opt.textContent = v.title;
+      videoEl.appendChild(opt);
+    });
+
+    videoEl.disabled = videos.length === 0;
+    videoUrlEl.value = "";
+  });
+
+  videoEl.addEventListener("change", () => {
+    videoUrlEl.value = videoEl.value;
+  });
+
+  // ── Form submission → Formspree → redirect ─────────────────
+  const form      = document.getElementById("viewForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const statusMsg = document.getElementById("statusMsg");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const targetUrl = videoUrlEl.value;
+    if (!targetUrl || targetUrl.includes("REPLACE_ME")) {
+      statusMsg.textContent = "Please select a video before submitting.";
+      statusMsg.classList.add("show");
+      return;
+    }
+
+    // Loading state
+    submitBtn.disabled = true;
+    submitBtn.classList.add("loading");
+    statusMsg.classList.remove("show");
+
+    const formData = new FormData(form);
+    // Remove the hidden URL field from the submission data
+    formData.delete("_videoUrl");
+
+    try {
+      const response = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+        method:  "POST",
+        body:    formData,
+        headers: { "Accept": "application/json" }
+      });
+
+      if (response.ok) {
+        // ✅ Success — send viewer to their video
+        window.location.href = targetUrl;
+      } else {
+        throw new Error("Submission failed");
+      }
+    } catch (err) {
+      statusMsg.textContent = "Something went wrong. Please try again.";
+      statusMsg.classList.add("show");
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("loading");
+    }
+  });
+</script>
+
+</body>
+</html>
